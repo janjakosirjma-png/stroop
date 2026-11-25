@@ -1,15 +1,122 @@
-/* Veliki, odzivni gumbi za miško in zaslone na dotik */ .response-btn { aspect-ratio: 1 / 1; touch-action: manipulation; transition: transform 0.08s ease, box-shadow 0.12s ease, opacity 0.12s ease; } .response-btn:active:not(:disabled) { transform: scale(0.96); }
-Spol * 
-Izberite spol...
-Barvni vid * 
-Normalen barvni vid
-Za odgovor uporabite štiri velike barvne kvadrate v mreži 2 × 2 brez napisov (klik z miško ali dotik na zaslonu):
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Stroopov test</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f1f5f9;color:#172033;font:18px system-ui,sans-serif}
+main{max-width:800px;margin:5vh auto;padding:32px;background:white;border:1px solid #dce3eb;border-radius:18px}
+h1{margin-top:0}
+p{line-height:1.6}
+label{display:block;margin:18px 0}
+input,button{font:inherit;padding:12px;border:1px solid #aab6c5;border-radius:8px}
+input{max-width:100%;width:220px}
+button{background:#223b63;color:white;cursor:pointer}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible{outline:3px solid #829ccd;outline-offset:4px}
+#stimulus{height:220px;display:grid;place-items:center;font-size:clamp(42px,8vw,74px);font-weight:800;background:#fff;color:#000}
 
-Zgoraj levo: rdeč kvadrat
-Zgoraj desno: zelen kvadrat
-Spodaj levo: moder kvadrat
-Spodaj desno: rumen kvadrat
-Primer: Če je beseda MODRA napisana z rdečo barvo, pritisnite rdeč kvadrat (zgoraj levo). Najprej boste opravili 8 kratkih vadbenih poskusov.
+/* Mreža 2x2 z barvnimi kvadratki brez besedila */
+#keys{
+  display:grid;
+  grid-template-columns:repeat(2,110px);
+  gap:16px;
+  justify-content:center;
+  margin:12px auto 20px;
+}
+#keys button{
+  width:110px;
+  height:110px;
+  aspect-ratio:1/1;
+  padding:0;
+  border:3px solid rgba(23,32,51,.18);
+  border-radius:14px;
+  transition:transform .08s ease;
+}
+#keys button:not(:disabled):active{
+  transform:scale(.95);
+}
 
-   
-const state = { participant: { participantID: '', age: '', gender: '', colorVision: 'Normalen', fullscreenActive: false, windowWidth: window.innerWidth, windowHeight: window.innerHeight }, phase: 'intro', // 'intro' | 'instructions' | 'practice' | 'transition' | 'main' | 'results' } else if (state.phase === 'main') { // Glavni test: zabeležimo vse zahtevane spremenljivke za poskus const record = { participantID: state.participant.participantID, age: state.participant.age, gender: state.participant.gender, colorVision: state.participant.colorVision, trialNumber: state.currentTrialIndex + 1, trialType: trial.trialType, word: trial.word, fontColor: trial.fontColor, correctAnswer: trial.correctAnswer, givenAnswer: selectedColor, accuracy: isCorrect, reactionTimeMs: reactionTimeMs, dateTime: new Date().toISOString(), fullscreenEnabled: state.participant.fullscreenActive ? 'Da' : 'Ne', windowSize: `${state.participant.windowWidth}x${state.participant.windowHeight}` }; state.resultsData.push(record); advanceTrial(); } } // Premik na naslednji poskus ali zaključek faze // Izpis podatkov v uporabniški vmesnik document.getElementById('results-participant-summary').textContent = `ID: ${state.participant.participantID} | Starost: ${state.participant.age} | Spol: ${state.participant.gender} | Barvni vid: ${state.participant.colorVision} | Fullscreen: ${state.participant.fullscreenActive ? 'Da' : 'Ne'} (${state.participant.windowWidth}×${state.participant.windowHeight})`; document.getElementById('stat-correct').textContent = `${correctTrials.length} / ${totalTrials}`; // Izvoz v CSV z UTF-8 BOM za pravilno podporo šumnikom (č, š, ž) function exportToCSV() { if (!state.resultsData.length) return; const headers = [ 'participantID', 'age', 'gender', 'colorVision', 'fullscreenEnabled', 'windowSize', 'trialNumber', 'trialType', 'word', 'fontColor', 'correctAnswer', 'givenAnswer', 'accuracy', 'reactionTimeMs', 'dateTime' ]; const rows = state.resultsData.map(row => [ `"${String(row.participantID).replace(/"/g, '""')}"`, row.age, `"${row.gender}"`, `"${row.colorVision}"`, `"${row.fullscreenEnabled}"`, `"${row.windowSize}"`, row.trialNumber, `"${row.trialType}"`, `"${row.word}"`, `"${row.fontColor}"`, `"${row.correctAnswer}"`, `"${row.givenAnswer}"`, row.accuracy, row.reactionTimeMs, `"${row.dateTime}"` ].join(',')); const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n'); // 1. Zavihek: Vsi posamezni poskusi const trialsSheetData = state.resultsData.map(row => ({ 'participantID': row.participantID, 'age': Number(row.age), 'gender': row.gender, 'colorVision': row.colorVision, 'fullscreenEnabled': row.fullscreenEnabled, 'windowSize': row.windowSize, 'trialNumber': row.trialNumber, 'trialType': row.trialType, 'word': row.word, 'fontColor': row.fontColor, 'correctAnswer': row.correctAnswer, 'givenAnswer': row.givenAnswer, 'accuracy': row.accuracy, 'reactionTimeMs': row.reactionTimeMs, 'dateTime': row.dateTime })); // 2. Zavihek: Povzetek analize const s = state.summaryStats; const summarySheetData = [ { 'Parameter': 'ID udeleženca', 'Vrednost': state.participant.participantID }, { 'Parameter': 'Starost', 'Vrednost': Number(state.participant.age) }, { 'Parameter': 'Spol', 'Vrednost': state.participant.gender }, { 'Parameter': 'Barvni vid', 'Vrednost': state.participant.colorVision }, { 'Parameter': 'Celozaslonski način', 'Vrednost': state.participant.fullscreenActive ? 'Da' : 'Ne' }, { 'Parameter': 'Velikost okna brskalnika', 'Vrednost': `${state.participant.windowWidth}x${state.participant.windowHeight}` }, { 'Parameter': 'Število pravilnih odgovorov', 'Vrednost': s.correctCount }, // Potrditev uvodnega obrazca document.getElementById('participant-form').addEventListener('submit', (e) => { e.preventDefault(); const idVal = document.getElementById('input-id').value.trim(); const ageVal = document.getElementById('input-age').value.trim(); const genderVal = document.getElementById('input-gender').value; const colorVisionVal = document.getElementById('input-color-vision').value; if (!idVal) { showMessage('Prosimo, vnesite ID udeleženca.'); return; } const ageNum = Number(ageVal); if (!ageVal || isNaN(ageNum) || ageNum < 5 || ageNum > 120) { showMessage('Prosimo, vnesite veljavno starost (med 5 in 120 let).'); return; } if (!genderVal) { showMessage('Prosimo, izberite spol iz spustnega seznama.'); return; } updateEnvironmentInfo(); state.participant.participantID = idVal; state.participant.age = ageNum; state.participant.gender = genderVal; state.participant.colorVision = colorVisionVal; state.phase = 'instructions'; showScreen('screen-instructions'); }); // Navigacija na navodilih
+#progress{color:#475569}
+table{width:100%;border-collapse:collapse;margin:20px 0}
+td,th{padding:12px;border-bottom:1px solid #ddd;text-align:left}
+small{color:#475569}
+[hidden]{display:none!important}
+@media(max-width:600px){
+  main{margin:0;border-radius:0;padding:18px}
+  #keys{grid-template-columns:repeat(2,96px);gap:14px}
+  #keys button{width:96px;height:96px}
+  table{font-size:14px}
+}
+</style>
+</head>
+<body><main>
+<section id="setup">
+  <h1>Stroopov test</h1>
+  <p>Izberi <strong>barvo črk</strong>, ne pomena besede. Odgovarjaj čim hitreje in čim natančneje s klikom na ustrezen barvni kvadratek (ali s tipkami 1–4: zgoraj levo = 1, zgoraj desno = 2, spodaj levo = 3, spodaj desno = 4).</p>
+  <label>Šifra udeleženca <input id="participant" maxlength="80" placeholder="npr. P001"></label>
+  <label>Število merjenih poskusov <input id="count" type="number" min="12" max="600" step="12" value="60"></label>
+  <p>Najprej sledi 12 vadbenih poskusov. Merjeni del vsebuje enako število skladnih, neskladnih in nevtralnih dražljajev.</p>
+  <button id="start">Začni vajo</button>
+  <p><small>Podatki ostanejo v brskalniku do zaprtja ali ponovnega nalaganja strani. Na koncu jih izvozi v CSV.</small></p>
+</section>
+
+<section id="test" hidden>
+  <div id="progress"></div>
+  <div id="stimulus" aria-live="off"></div>
+  <div id="keys"></div>
+  <p style="text-align:center">Izberi barvo črk.</p>
+  <button id="stop">Prekini</button>
+</section>
+
+<section id="between" hidden>
+  <h1>Vaja zaključena</h1>
+  <p id="practiceResult"></p>
+  <p>V merjenem delu ni povratne informacije o pravilnosti.</p>
+  <button id="begin">Začni merjeni del</button>
+</section>
+
+<section id="results" hidden>
+  <h1>Rezultati</h1>
+  <p id="summary"></p>
+  <table><thead><tr><th>Pogoj</th><th>Pravilnost</th><th>Povp. RT (ms)</th></tr></thead><tbody id="stats"></tbody></table>
+  <p id="effect"></p>
+  <button id="export">Izvozi CSV</button> <button id="restart">Nov test</button>
+  <p><small>Reakcijski časi so izmerjeni v brskalniku; naprava, zaslon in način odgovarjanja lahko vplivajo na meritve. Test ni standardiziran diagnostični instrument.</small></p>
+</section>
+</main><script>
+'use strict';
+const $=id=>document.getElementById(id);
+const colors=[['RDEČA','#c00000'],['MODRA','#004bcc'],['ZELENA','#007529'],['RUMENA','#eab308']];
+const conditions=['skladen','neskladen','nevtralen'];
+let trials=[],rows=[],practiceRows=[],index=0,phase='',active=false,t0=0,timer=0,raf=0,raf2=0,participant='',n=60,session='',current=null;
+function show(id){for(const x of ['setup','test','between','results'])$(x).hidden=x!==id;}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function makeTrials(total){const a=[];for(let block=0;block<total/12;block++){const b=[];for(let c=0;c<4;c++){b.push({condition:conditions[0],ink:c,word:colors[c][0]});b.push({condition:conditions[1],ink:c,word:colors[(c+1+block%3)%4][0]});b.push({condition:conditions[2],ink:c,word:'XXXX'});}a.push(...shuffle(b));}return a;}
+
+/* Ustvari 4 čiste barvne kvadratke brez besedila */
+colors.forEach((c,i)=>{
+  const b=document.createElement('button');
+  b.type='button';
+  b.style.background=c[1];
+  b.setAttribute('aria-label',c[0]);
+  b.onclick=()=>answer(i,'gumb');
+  $('keys').append(b);
+});
+
+function enabled(v){for(const b of $('keys').children)b.disabled=!v;}
+function clearPending(){active=false;clearTimeout(timer);cancelAnimationFrame(raf);cancelAnimationFrame(raf2);enabled(false);}
+function run(p,total){clearPending();phase=p;trials=makeTrials(total);index=0;show('test');next();}
+function next(){clearPending();if(index>=trials.length){if(phase==='vaja'){$('practiceResult').textContent=`Pravilni odgovori: ${practiceRows.filter(r=>r.correct).length} / ${practiceRows.length}`;show('between');}else finish(false);return;}
+current=trials[index];$('progress').textContent=`${phase==='vaja'?'Vaja':'Merjeni del'} · ${index+1} / ${trials.length}`;$('stimulus').style.color='#172033';$('stimulus').textContent='+';
+timer=setTimeout(()=>{if(document.hidden){finish(true);return;}$('stimulus').style.color=colors[current.ink][1];$('stimulus').textContent=current.word;raf=requestAnimationFrame(()=>{raf2=requestAnimationFrame(()=>{t0=performance.now();active=true;enabled(true);});});},500);}
+function answer(i,method){if(!active||document.hidden)return;const rt=performance.now()-t0;active=false;enabled(false);const correct=i===current.ink;const r={session,participant,phase,trial:index+1,condition:current.condition,word:current.word,ink:colors[current.ink][0],response:colors[i][0],correct:correct?1:0,rt_ms:Math.round(rt),method};(phase==='vaja'?practiceRows:rows).push(r);index++;$('stimulus').style.color='#172033';$('stimulus').textContent=phase==='vaja'?(correct?'Pravilno':'Napačno'):'';timer=setTimeout(next,phase==='vaja'?650:250);}
+document.addEventListener('keydown',e=>{if(e.repeat||e.ctrlKey||e.altKey||e.metaKey||$('test').hidden)return;if(/^[1-4]$/.test(e.key)){e.preventDefault();answer(Number(e.key)-1,'tipka');}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&!$('test').hidden)finish(true);});
+$('start').onclick=()=>{if(!$('count').reportValidity())return;participant=$('participant').value.trim();n=Number($('count').value);if(!Number.isInteger(n)||n<12||n>600||n%12!==0)return;rows=[];practiceRows=[];session=new Date().toISOString();run('vaja',12);};
+$('begin').onclick=()=>run('meritev',n);$('stop').onclick=()=>{if(confirm('Želiš prekiniti test?'))finish(true);};
+function mean(a){return a.length?a.reduce((s,r)=>s+r.rt_ms,0)/a.length:null;}
+function finish(aborted){clearPending();show('results');$('summary').textContent=`${aborted?'Test prekinjen. ':'Test zaključen. '}Merjeni odgovori: ${rows.length} / ${n}. Pravilni: ${rows.filter(r=>r.correct).length}.`;$('stats').replaceChildren();const means={};for(const c of conditions){const a=rows.filter(r=>r.condition===c),good=a.filter(r=>r.correct);means[c]=mean(good);const tr=document.createElement('tr');for(const v of [c,a.length?`${good.length}/${a.length} (${(100*good.length/a.length).toFixed(1)} %)`:'—',means[c]===null?'—':means[c].toFixed(1)]){const td=document.createElement('td');td.textContent=v;tr.append(td);}$('stats').append(
